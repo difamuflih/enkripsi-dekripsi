@@ -1,48 +1,36 @@
-function rc4(key, text) {
-  const s = [];
-  let j = 0;
-
-  // Key Scheduling Algorithm (KSA)
-  for (let i = 0; i < 256; i++) {
-    s[i] = i;
-  }
-
-  for (let i = 0; i < 256; i++) {
-    j = (j + s[i] + key.charCodeAt(i % key.length)) % 256;
-    [s[i], s[j]] = [s[j], s[i]]; // swap
-  }
-
-  let i = 0;
-  j = 0;
-  const result = [];
-
-  // Pseudo-Random Generation Algorithm (PRGA)
-  for (let k = 0; k < text.length; k++) {
-    i = (i + 1) % 256;
-    j = (j + s[i]) % 256;
-    [s[i], s[j]] = [s[j], s[i]]; // swap
-
-    const rnd = s[(s[i] + s[j]) % 256];
-    const encryptedChar = String.fromCharCode(text.charCodeAt(k) ^ rnd);
-
-    result.push(encryptedChar);
-  }
-
-  return result.join("");
-}
-
-function encrypt() {
-  const text = document.getElementById("text").value;
+function encryptText() {
+  const plaintext = document.getElementById("plaintext").value;
   const key = document.getElementById("key").value;
 
-  const encryptedText = rc4(key, text);
-  document.getElementById("encrypted").innerText = encryptedText;
+  if (!plaintext || !key) {
+    alert("Please enter text and a key.");
+    return;
+  }
+
+  // Enkripsi dengan AES
+  const encrypted = CryptoJS.AES.encrypt(plaintext, key).toString();
+
+  // Setel hasil enkripsi ke input ciphertext
+  document.getElementById("ciphertext").value = encrypted;
 }
 
-function decrypt() {
-  const encryptedText = document.getElementById("encrypted").innerText;
+function decryptText() {
+  const ciphertext = document.getElementById("ciphertext").value;
   const key = document.getElementById("key").value;
 
-  const decryptedText = rc4(key, encryptedText);
-  document.getElementById("decrypted").innerText = decryptedText;
+  if (!ciphertext || !key) {
+    alert("Please enter encrypted text and a key.");
+    return;
+  }
+
+  try {
+    // Dekripsi dengan AES
+    const decrypted = CryptoJS.AES.decrypt(ciphertext, key);
+    const plaintext = decrypted.toString(CryptoJS.enc.Utf8);
+
+    // Setel hasil dekripsi ke input decryptedtext
+    document.getElementById("decryptedtext").value = plaintext;
+  } catch (e) {
+    alert("Decryption failed. Make sure the key is correct.");
+  }
 }
